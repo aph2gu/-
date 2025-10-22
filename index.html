@@ -1,0 +1,598 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电路学正弦量转换计算器</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- 配置Tailwind -->
+    <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#36CFC9',
+            neutral: '#F5F7FA',
+            dark: '#1D2129',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+
+            .card-shadow {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            }
+
+            .transition-custom {
+                transition: all 0.3s ease;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-dark">
+    <!-- 顶部导航 -->
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-calculator text-primary text-2xl"></i>
+                <h1 class="text-xl md:text-2xl font-bold text-primary">电路学正弦量转换计算器</h1>
+            </div>
+            <div class="hidden md:flex items-center space-x-4">
+                <a href="#" class="text-gray-600 hover:text-primary transition-custom">
+                    <i class="fa fa-question-circle mr-1"></i>使用帮助
+                </a>
+                <a href="#" class="text-gray-600 hover:text-primary transition-custom">
+                    <i class="fa fa-book mr-1"></i>理论参考
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- 介绍部分 -->
+        <div class="mb-8 bg-white rounded-lg p-6 card-shadow">
+            <h2 class="text-lg font-semibold mb-2 text-primary">复数正弦量转换</h2>
+            <p class="text-gray-600">该工具用于电路学中正弦量与复数（相量）之间的转换，支持正弦量到相量的转换，以及复数的直角坐标与极坐标形式之间的转换。</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 输入区域 -->
+            <div class="bg-white rounded-lg p-6 card-shadow">
+                <h3 class="text-lg font-semibold mb-4 pb-2 border-b border-gray-100 flex items-center">
+                    <i class="fa fa-pencil-square-o text-primary mr-2"></i>输入参数
+                </h3>
+
+                <!-- 转换类型选择 -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 mb-2 font-medium">转换类型</label>
+                    <div class="flex flex-wrap gap-4">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="conversionType" value="sinToPhasor" class="form-radio text-primary" checked>
+                            <span class="ml-2">正弦量 → 相量</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="conversionType" value="phasorToSin" class="form-radio text-primary">
+                            <span class="ml-2">相量 → 正弦量</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="conversionType" value="complexConversion" class="form-radio text-primary">
+                            <span class="ml-2">复数形式转换</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 正弦量输入区域 -->
+                <div id="sinusoidalInput" class="space-y-4">
+                    <div>
+                        <label for="amplitude" class="block text-gray-700 mb-1">振幅 (A)</label>
+                        <div class="flex">
+                            <input type="number" id="amplitude" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" placeholder="例如：10" value="10">
+                            <span class="bg-gray-100 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md">V 或 A</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="frequency" class="block text-gray-700 mb-1">角频率 (ω)</label>
+                        <div class="flex">
+                            <input type="number" id="frequency" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" placeholder="例如：314" value="314">
+                            <span class="bg-gray-100 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md">rad/s</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="phase" class="block text-gray-700 mb-1">相位 (φ)</label>
+                        <div class="flex">
+                            <input type="number" id="phase" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" placeholder="例如：30" value="30">
+                            <span class="bg-gray-100 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md">度</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-neutral p-3 rounded-md text-sm text-gray-600">
+                        <p>正弦量表达式：<span class="font-medium">f(t) = A·sin(ωt + φ°)</span></p>
+                    </div>
+                </div>
+
+                <!-- 相量输入区域 (默认隐藏) -->
+                <div id="phasorInput" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-gray-700 mb-2 font-medium">复数形式</label>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="radio" name="complexForm" value="rectangular" class="form-radio text-primary" checked>
+                                <span class="ml-2">直角坐标 (a + jb)</span>
+                            </label>
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="radio" name="complexForm" value="polar" class="form-radio text-primary">
+                                <span class="ml-2">极坐标 (M∠θ°)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="rectangularInputs" class="space-y-4">
+                        <div>
+                            <label for="realPart" class="block text-gray-700 mb-1">实部 (a)</label>
+                            <input type="number" id="realPart" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" placeholder="例如：8.66" value="8.66">
+                        </div>
+                        <div>
+                            <label for="imaginaryPart" class="block text-gray-700 mb-1">虚部 (b)</label>
+                            <input type="number" id="imaginaryPart" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" placeholder="例如：5" value="5">
+                        </div>
+                    </div>
+
+                    <div id="polarInputs" class="space-y-4 hidden">
+                        <div>
+                            <label for="magnitude" class="block text-gray-700 mb-1">模值 (M)</label>
+                            <input type="number" id="magnitude" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" placeholder="例如：10" value="10">
+                        </div>
+                        <div>
+                            <label for="angle" class="block text-gray-700 mb-1">角度 (θ)</label>
+                            <input type="number" id="angle" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" placeholder="例如：30" value="30">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="phasorFrequency" class="block text-gray-700 mb-1">角频率 (ω)</label>
+                        <div class="flex">
+                            <input type="number" id="phasorFrequency" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" placeholder="例如：314" value="314">
+                            <span class="bg-gray-100 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md">rad/s</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 复数转换输入区域 (默认隐藏) -->
+                <div id="complexConversionInput" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-gray-700 mb-2 font-medium">输入形式</label>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="radio" name="inputForm" value="rectToPolar" class="form-radio text-primary" checked>
+                                <span class="ml-2">直角坐标 → 极坐标</span>
+                            </label>
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="radio" name="inputForm" value="polarToRect" class="form-radio text-primary">
+                                <span class="ml-2">极坐标 → 直角坐标</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="convertRectInputs" class="space-y-4">
+                        <div>
+                            <label for="convRealPart" class="block text-gray-700 mb-1">实部 (a)</label>
+                            <input type="number" id="convRealPart" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" placeholder="例如：8.66" value="8.66">
+                        </div>
+                        <div>
+                            <label for="convImaginaryPart" class="block text-gray-700 mb-1">虚部 (b)</label>
+                            <input type="number" id="convImaginaryPart" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" placeholder="例如：5" value="5">
+                        </div>
+                    </div>
+
+                    <div id="convertPolarInputs" class="space-y-4 hidden">
+                        <div>
+                            <label for="convMagnitude" class="block text-gray-700 mb-1">模值 (M)</label>
+                            <input type="number" id="convMagnitude" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" placeholder="例如：10" value="10">
+                        </div>
+                        <div>
+                            <label for="convAngle" class="block text-gray-700 mb-1">角度 (θ)</label>
+                            <input type="number" id="convAngle" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" placeholder="例如：30" value="30">
+                        </div>
+                    </div>
+                </div>
+
+                <button id="calculateBtn" class="mt-6 w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 px-4 rounded-md transition-custom flex items-center justify-center">
+                    <i class="fa fa-calculator mr-2"></i>计算转换结果
+                </button>
+            </div>
+
+            <!-- 结果显示区域 -->
+            <div class="bg-white rounded-lg p-6 card-shadow">
+                <h3 class="text-lg font-semibold mb-4 pb-2 border-b border-gray-100 flex items-center">
+                    <i class="fa fa-bar-chart text-primary mr-2"></i>转换结果
+                </h3>
+
+                <div id="resultContainer" class="space-y-6">
+                    <!-- 正弦量结果 -->
+                    <div id="sinusoidalResult" class="p-4 bg-neutral rounded-md">
+                        <h4 class="font-medium mb-2 text-primary">正弦量表示</h4>
+                        <div class="text-lg font-mono" id="sinusoidalOutput">f(t) = 10·sin(314t + 30°)</div>
+                    </div>
+
+                    <!-- 相量结果 -->
+                    <div id="phasorResult" class="p-4 bg-neutral rounded-md">
+                        <h4 class="font-medium mb-2 text-primary">复数相量表示</h4>
+                        <div class="space-y-2">
+                            <div class="font-mono" id="rectangularOutput">5 + j8.66</div>
+                            <div class="font-mono" id="polarOutput">10∠30°</div>
+                        </div>
+                    </div>
+
+                    <!-- 计算过程 -->
+                    <div>
+                        <h4 class="font-medium mb-2 text-primary flex items-center">
+                            <span>计算过程</span>
+                            <button id="toggleCalculation" class="ml-2 text-sm text-primary hover:text-primary/80">
+                                <i class="fa fa-chevron-down"></i>
+                            </button>
+                        </h4>
+                        <div id="calculationSteps" class="p-4 bg-neutral rounded-md text-sm space-y-2">
+                            <p>1. 正弦量到相量的转换：</p>
+                            <p>   已知正弦量 f(t) = A·sin(ωt + φ°)</p>
+                            <p>   其对应的相量模值为 A/√2（有效值）或 A（振幅值）</p>
+                            <p>   相位为 φ° - 90°（因为 sin(x) = cos(x - 90°)）</p>
+                            <p>2. 计算结果：</p>
+                            <p>   模值 = 10/√2 ≈ 7.07</p>
+                            <p>   相位 = 30° - 90° = -60°</p>
+                            <p>   极坐标形式：7.07∠-60°</p>
+                            <p>   转换为直角坐标：7.07·cos(-60°) + j7.07·sin(-60°) ≈ 3.53 - j6.12</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 公式参考 -->
+        <div class="mt-8 bg-white rounded-lg p-6 card-shadow">
+            <h3 class="text-lg font-semibold mb-4 pb-2 border-b border-gray-100 flex items-center">
+                <i class="fa fa-book text-primary mr-2"></i>转换公式参考
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-medium mb-2 text-primary">正弦量与相量转换</h4>
+                    <div class="space-y-3 text-gray-700">
+                        <p>• 正弦量：f(t) = A·sin(ωt + φ)</p>
+                        <p>• 对应的相量（有效值）：<span class="font-mono">(A/√2)∠(φ - 90°)</span></p>
+                        <p>• 相量到正弦量：已知相量 M∠θ，则正弦量为 <span class="font-mono">√2·M·sin(ωt + θ + 90°)</span></p>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-medium mb-2 text-primary">复数形式转换</h4>
+                    <div class="space-y-3 text-gray-700">
+                        <p>• 直角坐标 → 极坐标：</p>
+                        <p>  M = √(a² + b²)</p>
+                        <p>  θ = arctan(b/a) （根据象限调整）</p>
+                        <p>• 极坐标 → 直角坐标：</p>
+                        <p>  a = M·cosθ</p>
+                        <p>  b = M·sinθ</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-white mt-12 py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa fa-calculator text-secondary"></i>
+                        <span class="font-bold">电路学正弦量转换计算器</span>
+                    </div>
+                    <p class="text-gray-400 text-sm mt-1">专业的电路学计算工具</p>
+                </div>
+
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-secondary transition-custom">
+                        <i class="fa fa-question-circle"></i> 帮助
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-secondary transition-custom">
+                        <i class="fa fa-envelope"></i> 联系我们
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-secondary transition-custom">
+                        <i class="fa fa-github"></i> GitHub
+                    </a>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-6 pt-6 text-center text-gray-500 text-sm">
+                © 2023 电路学工具 | 专注于电路计算的专业工具
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    // DOM元素
+    const conversionTypeRadios = document.querySelectorAll('input[name="conversionType"]');
+    const sinusoidalInput = document.getElementById('sinusoidalInput');
+    const phasorInput = document.getElementById('phasorInput');
+    const complexConversionInput = document.getElementById('complexConversionInput');
+
+    const complexFormRadios = document.querySelectorAll('input[name="complexForm"]');
+    const rectangularInputs = document.getElementById('rectangularInputs');
+    const polarInputs = document.getElementById('polarInputs');
+
+    const inputFormRadios = document.querySelectorAll('input[name="inputForm"]');
+    const convertRectInputs = document.getElementById('convertRectInputs');
+    const convertPolarInputs = document.getElementById('convertPolarInputs');
+
+    const calculateBtn = document.getElementById('calculateBtn');
+    const toggleCalculationBtn = document.getElementById('toggleCalculation');
+    const calculationSteps = document.getElementById('calculationSteps');
+
+    // 转换类型切换
+    conversionTypeRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        sinusoidalInput.classList.add('hidden');
+        phasorInput.classList.add('hidden');
+        complexConversionInput.classList.add('hidden');
+
+        if (radio.value === 'sinToPhasor') {
+          sinusoidalInput.classList.remove('hidden');
+        } else if (radio.value === 'phasorToSin') {
+          phasorInput.classList.remove('hidden');
+        } else if (radio.value === 'complexConversion') {
+          complexConversionInput.classList.remove('hidden');
+        }
+      });
+    });
+
+    // 复数形式切换（相量输入）
+    complexFormRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        rectangularInputs.classList.add('hidden');
+        polarInputs.classList.add('hidden');
+
+        if (radio.value === 'rectangular') {
+          rectangularInputs.classList.remove('hidden');
+        } else if (radio.value === 'polar') {
+          polarInputs.classList.remove('hidden');
+        }
+      });
+    });
+
+    // 输入形式切换（复数转换）
+    inputFormRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        convertRectInputs.classList.add('hidden');
+        convertPolarInputs.classList.add('hidden');
+
+        if (radio.value === 'rectToPolar') {
+          convertRectInputs.classList.remove('hidden');
+        } else if (radio.value === 'polarToRect') {
+          convertPolarInputs.classList.remove('hidden');
+        }
+      });
+    });
+
+    // 切换计算过程显示
+    toggleCalculationBtn.addEventListener('click', () => {
+      calculationSteps.classList.toggle('hidden');
+      const icon = toggleCalculationBtn.querySelector('i');
+      if (calculationSteps.classList.contains('hidden')) {
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-right');
+      } else {
+        icon.classList.remove('fa-chevron-right');
+        icon.classList.add('fa-chevron-down');
+      }
+    });
+
+    // 计算按钮点击事件
+    calculateBtn.addEventListener('click', calculateConversion);
+
+    // 计算转换结果
+    function calculateConversion() {
+      // 获取当前选中的转换类型
+      let conversionType = document.querySelector('input[name="conversionType"]:checked').value;
+
+      if (conversionType === 'sinToPhasor') {
+        calculateSinToPhasor();
+      } else if (conversionType === 'phasorToSin') {
+        calculatePhasorToSin();
+      } else if (conversionType === 'complexConversion') {
+        calculateComplexConversion();
+      }
+
+      // 添加计算动画效果
+      const resultContainer = document.getElementById('resultContainer');
+      resultContainer.classList.add('bg-primary/5');
+      setTimeout(() => {
+        resultContainer.classList.remove('bg-primary/5');
+      }, 300);
+    }
+
+    // 正弦量转相量
+    function calculateSinToPhasor() {
+      // 获取输入值
+      const amplitude = parseFloat(document.getElementById('amplitude').value) || 0;
+      const frequency = parseFloat(document.getElementById('frequency').value) || 0;
+      const phase = parseFloat(document.getElementById('phase').value) || 0;
+
+      // 计算相量（有效值）
+      const effectiveValue = amplitude / Math.sqrt(2);
+      const phasorPhase = phase - 90; // 转换为余弦形式的相位
+
+      // 极坐标转直角坐标
+      const radPhase = phasorPhase * Math.PI / 180;
+      const realPart = effectiveValue * Math.cos(radPhase);
+      const imaginaryPart = effectiveValue * Math.sin(radPhase);
+
+      // 更新结果显示
+      document.getElementById('sinusoidalOutput').textContent =
+        `f(t) = ${amplitude.toFixed(2)}·sin(${frequency.toFixed(2)}t + ${phase.toFixed(2)}°)`;
+
+      document.getElementById('rectangularOutput').textContent =
+        `${realPart.toFixed(2)} + j${imaginaryPart.toFixed(2)}`;
+
+      document.getElementById('polarOutput').textContent =
+        `${effectiveValue.toFixed(2)}∠${phasorPhase.toFixed(2)}°`;
+
+      // 更新计算过程
+      updateCalculationSteps(`
+        <p>1. 正弦量到相量的转换：</p>
+        <p>   已知正弦量 f(t) = ${amplitude.toFixed(2)}·sin(${frequency.toFixed(2)}t + ${phase.toFixed(2)}°)</p>
+        <p>   其对应的相量模值为 A/√2（有效值）</p>
+        <p>   相位为 φ° - 90°（因为 sin(x) = cos(x - 90°)）</p>
+        <p>2. 计算结果：</p>
+        <p>   模值 = ${amplitude.toFixed(2)}/√2 ≈ ${effectiveValue.toFixed(2)}</p>
+        <p>   相位 = ${phase.toFixed(2)}° - 90° = ${phasorPhase.toFixed(2)}°</p>
+        <p>   极坐标形式：${effectiveValue.toFixed(2)}∠${phasorPhase.toFixed(2)}°</p>
+        <p>   转换为直角坐标：${effectiveValue.toFixed(2)}·cos(${phasorPhase.toFixed(2)}°) + j${effectiveValue.toFixed(2)}·sin(${phasorPhase.toFixed(2)}°) ≈ ${realPart.toFixed(2)} + j${imaginaryPart.toFixed(2)}</p>
+      `);
+    }
+
+    // 相量转正弦量
+    function calculatePhasorToSin() {
+      const complexForm = document.querySelector('input[name="complexForm"]:checked').value;
+      let magnitude, angle, frequency;
+
+      if (complexForm === 'rectangular') {
+        const realPart = parseFloat(document.getElementById('realPart').value) || 0;
+        const imaginaryPart = parseFloat(document.getElementById('imaginaryPart').value) || 0;
+
+        // 直角坐标转极坐标
+        magnitude = Math.sqrt(realPart * realPart + imaginaryPart * imaginaryPart);
+        angle = Math.atan2(imaginaryPart, realPart) * 180 / Math.PI;
+        frequency = parseFloat(document.getElementById('phasorFrequency').value) || 0;
+      } else {
+        magnitude = parseFloat(document.getElementById('magnitude').value) || 0;
+        angle = parseFloat(document.getElementById('angle').value) || 0;
+        frequency = parseFloat(document.getElementById('phasorFrequency').value) || 0;
+      }
+
+      // 计算正弦量参数
+      const amplitude = magnitude * Math.sqrt(2);
+      const phase = angle + 90; // 转换为正弦形式的相位
+
+      // 极坐标转直角坐标（用于显示）
+      const radAngle = angle * Math.PI / 180;
+      const realPart = magnitude * Math.cos(radAngle);
+      const imaginaryPart = magnitude * Math.sin(radAngle);
+
+      // 更新结果显示
+      document.getElementById('sinusoidalOutput').textContent =
+        `f(t) = ${amplitude.toFixed(2)}·sin(${frequency.toFixed(2)}t + ${phase.toFixed(2)}°)`;
+
+      document.getElementById('rectangularOutput').textContent =
+        `${realPart.toFixed(2)} + j${imaginaryPart.toFixed(2)}`;
+
+      document.getElementById('polarOutput').textContent =
+        `${magnitude.toFixed(2)}∠${angle.toFixed(2)}°`;
+
+      // 更新计算过程
+      updateCalculationSteps(`
+        <p>1. 相量到正弦量的转换：</p>
+        <p>   已知相量 ${magnitude.toFixed(2)}∠${angle.toFixed(2)}°，角频率 ω = ${frequency.toFixed(2)} rad/s</p>
+        <p>   其对应的正弦量振幅为 √2·M</p>
+        <p>   相位为 θ° + 90°（因为 cos(x) = sin(x + 90°)）</p>
+        <p>2. 计算结果：</p>
+        <p>   振幅 = √2·${magnitude.toFixed(2)} ≈ ${amplitude.toFixed(2)}</p>
+        <p>   相位 = ${angle.toFixed(2)}° + 90° = ${phase.toFixed(2)}°</p>
+        <p>   正弦量形式：f(t) = ${amplitude.toFixed(2)}·sin(${frequency.toFixed(2)}t + ${phase.toFixed(2)}°)</p>
+        <p>   相量直角坐标形式：${realPart.toFixed(2)} + j${imaginaryPart.toFixed(2)}</p>
+      `);
+    }
+
+    // 复数形式转换
+    function calculateComplexConversion() {
+      const inputForm = document.querySelector('input[name="inputForm"]:checked').value;
+
+      if (inputForm === 'rectToPolar') {
+        // 直角坐标转极坐标
+        const realPart = parseFloat(document.getElementById('convRealPart').value) || 0;
+        const imaginaryPart = parseFloat(document.getElementById('convImaginaryPart').value) || 0;
+
+        const magnitude = Math.sqrt(realPart * realPart + imaginaryPart * imaginaryPart);
+        const angle = Math.atan2(imaginaryPart, realPart) * 180 / Math.PI;
+
+        // 更新结果显示
+        document.getElementById('sinusoidalOutput').textContent = "不适用（纯复数转换）";
+        document.getElementById('rectangularOutput').textContent =
+          `${realPart.toFixed(2)} + j${imaginaryPart.toFixed(2)}`;
+        document.getElementById('polarOutput').textContent =
+          `${magnitude.toFixed(2)}∠${angle.toFixed(2)}°`;
+
+        // 更新计算过程
+        updateCalculationSteps(`
+          <p>1. 直角坐标到极坐标的转换：</p>
+          <p>   已知复数 ${realPart.toFixed(2)} + j${imaginaryPart.toFixed(2)}</p>
+          <p>   模值 M = √(a² + b²)</p>
+          <p>   角度 θ = arctan(b/a)（弧度转换为度）</p>
+          <p>2. 计算结果：</p>
+          <p>   M = √(${realPart.toFixed(2)}² + ${imaginaryPart.toFixed(2)}²) = √(${((realPart**2 + imaginaryPart**2).toFixed(2))}) ≈ ${magnitude.toFixed(2)}</p>
+          <p>   θ = arctan(${imaginaryPart.toFixed(2)}/${realPart.toFixed(2)}) ≈ ${angle.toFixed(2)}°</p>
+          <p>   极坐标形式：${magnitude.toFixed(2)}∠${angle.toFixed(2)}°</p>
+        `);
+      } else {
+        // 极坐标转直角坐标
+        const magnitude = parseFloat(document.getElementById('convMagnitude').value) || 0;
+        const angle = parseFloat(document.getElementById('convAngle').value) || 0;
+
+        const radAngle = angle * Math.PI / 180;
+        const realPart = magnitude * Math.cos(radAngle);
+        const imaginaryPart = magnitude * Math.sin(radAngle);
+
+        // 更新结果显示
+        document.getElementById('sinusoidalOutput').textContent = "不适用（纯复数转换）";
+        document.getElementById('rectangularOutput').textContent =
+          `${realPart.toFixed(2)} + j${imaginaryPart.toFixed(2)}`;
+        document.getElementById('polarOutput').textContent =
+          `${magnitude.toFixed(2)}∠${angle.toFixed(2)}°`;
+
+        // 更新计算过程
+        updateCalculationSteps(`
+          <p>1. 极坐标到直角坐标的转换：</p>
+          <p>   已知复数 ${magnitude.toFixed(2)}∠${angle.toFixed(2)}°</p>
+          <p>   实部 a = M·cosθ</p>
+          <p>   虚部 b = M·sinθ</p>
+          <p>2. 计算结果：</p>
+          <p>   a = ${magnitude.toFixed(2)}·cos(${angle.toFixed(2)}°) ≈ ${realPart.toFixed(2)}</p>
+          <p>   b = ${magnitude.toFixed(2)}·sin(${angle.toFixed(2)}°) ≈ ${imaginaryPart.toFixed(2)}</p>
+          <p>   直角坐标形式：${realPart.toFixed(2)} + j${imaginaryPart.toFixed(2)}</p>
+        `);
+      }
+    }
+
+    // 更新计算步骤
+    function updateCalculationSteps(html) {
+      calculationSteps.innerHTML = html;
+      // 确保计算步骤可见
+      if (calculationSteps.classList.contains('hidden')) {
+        calculationSteps.classList.remove('hidden');
+        const icon = toggleCalculationBtn.querySelector('i');
+        icon.classList.remove('fa-chevron-right');
+        icon.classList.add('fa-chevron-down');
+      }
+    }
+
+    // 页面加载时执行一次计算
+    window.addEventListener('load', calculateConversion);
+    </script>
+</body>
+</html>
